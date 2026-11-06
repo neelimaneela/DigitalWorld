@@ -1,13 +1,18 @@
 import { Link, useLocation } from 'react-router-dom';
 import { CheckCircle2, Package, Truck, Home as HomeIcon, ArrowRight, Copy } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
+import { formatIDR, toIDR } from '../utils/currency';
 
 interface OrderData {
   id: string;
   date: string;
   items: { product: { id: string; name: string; images: string[]; price: number }; quantity: number }[];
   total: number;
-  shipping: { name: string; address: string; city: string; state: string; zip: string };
+  subtotal?: number;
+  discount?: number;
+  shippingCost?: number;
+  currency?: 'IDR';
+  shipping: { name: string; address: string; city: string; state: string; province?: string; district?: string; village?: string; zip: string; country?: string; phone?: string };
 }
 
 export default function OrderConfirmationPage() {
@@ -24,6 +29,8 @@ export default function OrderConfirmationPage() {
       </div>
     );
   }
+
+  const displayAmount = (amount: number) => formatIDR(order.currency === 'IDR' ? amount : toIDR(amount));
 
   const copyOrderId = () => {
     navigator.clipboard.writeText(order.id);
@@ -95,15 +102,20 @@ export default function OrderConfirmationPage() {
                 <img src={item.product.images[0]} alt={item.product.name} className="h-16 w-16 rounded-lg object-cover" />
                 <div className="flex-1 min-w-0">
                   <Link to={`/product/${item.product.id}`} className="font-medium text-sm text-slate-800 dark:text-slate-100 truncate hover:text-primary-600 transition">{item.product.name}</Link>
-                  <p className="text-xs text-slate-500">Qty: {item.quantity} · ${item.product.price}</p>
+                  <p className="text-xs text-slate-500" >Qty: {item.quantity} · {displayAmount(item.product.price)}</p>
                 </div>
-                <span className="font-semibold text-slate-900 dark:text-white">${(item.product.price * item.quantity).toFixed(2)}</span>
+                <span className="font-semibold text-slate-900 dark:text-white">{displayAmount(item.product.price * item.quantity)}</span>
               </div>
             ))}
           </div>
+          <div className="space-y-2 border-t border-slate-100 dark:border-slate-800 pt-3 mt-3 text-sm">
+            {order.subtotal !== undefined && <div className="flex justify-between"><span>Subtotal</span><span>{displayAmount(order.subtotal)}</span></div>}
+            {(order.discount || 0) > 0 && <div className="flex justify-between text-success-600"><span>Diskon</span><span>-{displayAmount(order.discount || 0)}</span></div>}
+            {order.shippingCost !== undefined && <div className="flex justify-between"><span>Ongkos kirim</span><span>{displayAmount(order.shippingCost)}</span></div>}
+          </div>
           <div className="flex justify-between border-t border-slate-100 dark:border-slate-800 pt-3 mt-3">
             <span className="font-semibold text-slate-800 dark:text-slate-100">Total Paid</span>
-            <span className="font-display text-xl font-bold text-slate-900 dark:text-white">${order.total.toFixed(2)}</span>
+            <span className="font-display text-xl font-bold text-slate-900 dark:text-white">{displayAmount(order.total)}</span>
           </div>
         </div>
 
@@ -112,7 +124,8 @@ export default function OrderConfirmationPage() {
           <h2 className="font-semibold text-slate-800 dark:text-slate-100 mb-3">Shipping Address</h2>
           <p className="text-sm text-slate-600 dark:text-slate-300">{order.shipping.name}</p>
           <p className="text-sm text-slate-600 dark:text-slate-300">{order.shipping.address}</p>
-          <p className="text-sm text-slate-600 dark:text-slate-300">{order.shipping.city}, {order.shipping.state} {order.shipping.zip}</p>
+          {order.shipping.phone && <p className="text-sm text-slate-600 dark:text-slate-300">Telepon: {order.shipping.phone}</p>}
+          <p className="text-sm text-slate-600 dark:text-slate-300">{order.shipping.village ? order.shipping.village + ', ' : ''}{order.shipping.district ? order.shipping.district + ', ' : ''}{order.shipping.city}, {order.shipping.province || order.shipping.state} {order.shipping.zip}, {order.shipping.country || 'Indonesia'}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">

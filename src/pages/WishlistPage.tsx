@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Trash2, ArrowRight, ChevronRight } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
+import { formatIDR, toIDR } from '../utils/currency';
 import { getProductById } from '../data/products';
 
 export default function WishlistPage() {
@@ -54,8 +55,8 @@ export default function WishlistPage() {
                   <h3 className="font-semibold text-slate-800 dark:text-slate-100 line-clamp-1 hover:text-primary-600 transition">{product.name}</h3>
                 </Link>
                 <div className="mt-2 flex items-center gap-2">
-                  <span className="text-lg font-bold text-slate-900 dark:text-white">${product.price}</span>
-                  {product.originalPrice > product.price && <span className="text-sm text-slate-400 line-through">${product.originalPrice}</span>}
+                  <span className="text-lg font-bold text-slate-900 dark:text-white">{formatIDR(toIDR(product.price))}</span>
+                  {product.originalPrice > product.price && <span className="text-sm text-slate-400 line-through">{formatIDR(toIDR(product.originalPrice))}</span>}
                 </div>
                 <div className="mt-3 flex items-center gap-2">
                   <button

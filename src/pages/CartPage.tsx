@@ -2,17 +2,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Minus, Plus, Trash2, ShoppingCart, ArrowRight, ShoppingBag, ChevronRight, Tag } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 import { useState } from 'react';
+import { FIXED_SHIPPING_IDR, formatIDR, toIDR } from '../utils/currency';
 
 export default function CartPage() {
-  const { cart, updateQuantity, removeFromCart, clearCart, cartTotal, user } = useStore();
+  const { cart, updateQuantity, removeFromCart, clearCart } = useStore();
   const navigate = useNavigate();
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
 
-  const discount = promoApplied ? cartTotal * 0.2 : 0;
-  const shipping = cartTotal > 50 || cartTotal === 0 ? 0 : 9.99;
-  const tax = (cartTotal - discount) * 0.08;
-  const finalTotal = cartTotal - discount + shipping + tax;
+  const subtotalIDR = cart.reduce((sum, item) => sum + toIDR(item.product.price) * item.quantity, 0);
+  const discount = promoApplied ? Math.round(subtotalIDR * 0.2) : 0;
+  const shipping = cart.length === 0 ? 0 : FIXED_SHIPPING_IDR;
+  const finalTotal = subtotalIDR - discount + shipping;
 
   const applyPromo = () => {
     if (promoCode.toUpperCase() === 'WELCOME20') {
@@ -87,9 +88,9 @@ export default function CartPage() {
                       </button>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-slate-900 dark:text-white">${(item.product.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-bold text-slate-900 dark:text-white">{formatIDR(toIDR(item.product.price) * item.quantity)}</p>
                       {itemDiscount > 0 && (
-                        <p className="text-xs text-slate-400 line-through">${(item.product.originalPrice * item.quantity).toFixed(2)}</p>
+                        <p className="text-xs text-slate-400 line-through">{formatIDR(toIDR(item.product.originalPrice) * item.quantity)}</p>
                       )}
                     </div>
                   </div>
@@ -130,36 +131,27 @@ export default function CartPage() {
             <div className="space-y-2.5 text-sm border-t border-slate-100 dark:border-slate-800 pt-4">
               <div className="flex justify-between text-slate-600 dark:text-slate-300">
                 <span>Subtotal ({cart.length} items)</span>
-                <span className="font-medium text-slate-800 dark:text-slate-100">${cartTotal.toFixed(2)}</span>
+                <span className="font-medium text-slate-800 dark:text-slate-100">{formatIDR(subtotalIDR)}</span>
               </div>
               {promoApplied && (
                 <div className="flex justify-between text-success-600 dark:text-success-400">
                   <span>Discount (20%)</span>
-                  <span>-${discount.toFixed(2)}</span>
+                  <span>-{formatIDR(discount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-slate-600 dark:text-slate-300">
                 <span>Shipping</span>
-                <span className="font-medium text-slate-800 dark:text-slate-100">{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span>
+                <span className="font-medium text-slate-800 dark:text-slate-100">{formatIDR(shipping)}</span>
               </div>
-              <div className="flex justify-between text-slate-600 dark:text-slate-300">
-                <span>Tax (8%)</span>
-                <span className="font-medium text-slate-800 dark:text-slate-100">${tax.toFixed(2)}</span>
-              </div>
-              {shipping > 0 && (
-                <p className="text-xs text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-950/50 rounded-lg p-2">
-                  Add ${(50 - cartTotal).toFixed(2)} more for free shipping!
-                </p>
-              )}
             </div>
 
             <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-4 mt-4">
               <span className="font-semibold text-slate-800 dark:text-slate-100">Total</span>
-              <span className="font-display text-2xl font-bold text-slate-900 dark:text-white">${finalTotal.toFixed(2)}</span>
+              <span className="font-display text-2xl font-bold text-slate-900 dark:text-white">{formatIDR(finalTotal)}</span>
             </div>
 
             <button
-              onClick={() => navigate('/checkout')}
+              onClick={() => navigate('/checkout', { state: { discount } })}
               className="btn-primary w-full mt-5 group"
             >
               Proceed to Checkout

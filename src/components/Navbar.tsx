@@ -8,6 +8,7 @@ import { useTheme } from '../store/ThemeContext';
 import { searchProducts } from '../data/products';
 import { categories } from '../data/categories';
 import type { Product } from '../types';
+import { formatIDR, toIDR } from '../utils/currency';
 
 export default function Navbar() {
   const { cartCount, wishlist, user, logout } = useStore();
@@ -78,7 +79,7 @@ export default function Navbar() {
         <div className="container-x flex items-center justify-between py-2">
           <p className="flex items-center gap-1.5">
             <Zap className="h-3.5 w-3.5 text-accent-400" />
-            Free shipping on orders over $50 — Shop now!
+            Flat shipping Rp52.000 — Shop now!
           </p>
           <div className="flex items-center gap-4">
             <Link to="/orders" className="hover:text-white transition">Track Order</Link>
@@ -130,7 +131,7 @@ export default function Navbar() {
                       <img src={p.images[0]} alt={p.name} className="h-12 w-12 rounded-lg object-cover" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">{p.name}</p>
-                        <p className="text-xs text-slate-500">{p.brand} · ${p.price}</p>
+                        <p className="text-xs text-slate-500">{p.brand} · {formatIDR(toIDR(p.price))}</p>
                       </div>
                     </Link>
                   ))}

@@ -4,6 +4,7 @@ import { SlidersHorizontal, X, Search, ChevronRight, PackageSearch } from 'lucid
 import ProductCard from '../components/ProductCard';
 import { products } from '../data/products';
 import { categories } from '../data/categories';
+import { formatIDR, toIDR } from '../utils/currency';
 
 export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,7 +15,7 @@ export default function ProductsPage() {
   const searchParam = searchParams.get('search') || '';
 
   const [sortBy, setSortBy] = useState('featured');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 2500]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [minRating, setMinRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -44,7 +45,7 @@ export default function ProductsPage() {
       );
     }
     if (selectedBrands.length > 0) result = result.filter((p) => selectedBrands.includes(p.brand));
-    result = result.filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    result = result.filter((p) => toIDR(p.price) >= priceRange[0] && toIDR(p.price) <= priceRange[1]);
     if (minRating > 0) result = result.filter((p) => p.rating >= minRating);
     if (inStockOnly) result = result.filter((p) => p.stock > 0);
 
@@ -68,13 +69,13 @@ export default function ProductsPage() {
 
   const clearFilters = () => {
     setSelectedBrands([]);
-    setPriceRange([0, 2500]);
+    setPriceRange([0, 50000000]);
     setMinRating(0);
     setInStockOnly(false);
     setSearchParams({});
   };
 
-  const activeFilterCount = selectedBrands.length + (minRating > 0 ? 1 : 0) + (inStockOnly ? 1 : 0) + (priceRange[0] > 0 || priceRange[1] < 2500 ? 1 : 0);
+  const activeFilterCount = selectedBrands.length + (minRating > 0 ? 1 : 0) + (inStockOnly ? 1 : 0) + (priceRange[0] > 0 || priceRange[1] < 50000000 ? 1 : 0);
 
   useEffect(() => { setShowFilters(false); }, [searchParams]);
 
@@ -107,10 +108,10 @@ export default function ProductsPage() {
           <div className="flex items-center gap-2">
             <input type="number" min={0} max={priceRange[1]} value={priceRange[0]} onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])} className="input-field !py-2 !px-3 text-sm" placeholder="Min" />
             <span className="text-slate-400">—</span>
-            <input type="number" min={priceRange[0]} max={2500} value={priceRange[1]} onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])} className="input-field !py-2 !px-3 text-sm" placeholder="Max" />
+            <input type="number" min={priceRange[0]} max={50000000} value={priceRange[1]} onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])} className="input-field !py-2 !px-3 text-sm" placeholder="Max" />
           </div>
-          <input type="range" min={0} max={2500} step={50} value={priceRange[1]} onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])} className="w-full accent-primary-600" />
-          <p className="text-xs text-slate-500">${priceRange[0]} — ${priceRange[1]}</p>
+          <input type="range" min={0} max={50000000} step={500000} value={priceRange[1]} onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])} className="w-full accent-primary-600" />
+          <p className="text-xs text-slate-500">{formatIDR(priceRange[0])} — {formatIDR(priceRange[1])}</p>
         </div>
       </div>
 

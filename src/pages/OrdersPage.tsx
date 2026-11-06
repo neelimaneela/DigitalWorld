@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, ChevronRight, ShoppingBag, Calendar, MapPin } from 'lucide-react';
+import { formatIDR, toIDR } from '../utils/currency';
 
 interface StoredOrder {
   id: string;
   date: string;
   items: { product: { id: string; name: string; images: string[]; price: number }; quantity: number }[];
   total: number;
-  shipping: { name: string; address: string; city: string; state: string; zip: string };
+  currency?: 'IDR';
+  shipping: { name: string; address: string; city: string; state: string; province?: string; district?: string; village?: string; zip: string; country?: string };
 }
 
 export default function OrdersPage() {
@@ -20,6 +22,8 @@ export default function OrdersPage() {
       setOrders([]);
     }
   }, []);
+
+  const displayAmount = (order: StoredOrder, amount: number) => formatIDR(order.currency === 'IDR' ? amount : toIDR(amount));
 
   if (orders.length === 0) {
     return (
@@ -60,12 +64,12 @@ export default function OrdersPage() {
                 </div>
                 <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500">
                   <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {new Date(order.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                  <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {order.shipping.city}, {order.shipping.state}</span>
+                  <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {order.shipping.city}, {order.shipping.province || order.shipping.state}</span>
                 </div>
               </div>
               <div className="text-right">
                 <p className="text-xs text-slate-400">Total</p>
-                <p className="font-display text-lg font-bold text-slate-900 dark:text-white">${order.total.toFixed(2)}</p>
+                <p className="font-display text-lg font-bold text-slate-900 dark:text-white">{displayAmount(order, order.total)}</p>
               </div>
             </div>
 
@@ -79,7 +83,7 @@ export default function OrdersPage() {
                     <Link to={`/product/${item.product.id}`} className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate hover:text-primary-600 transition">{item.product.name}</Link>
                     <p className="text-xs text-slate-500">Qty: {item.quantity}</p>
                   </div>
-                  <span className="text-sm font-semibold text-slate-900 dark:text-white">${(item.product.price * item.quantity).toFixed(2)}</span>
+                  <span className="text-sm font-semibold text-slate-900 dark:text-white">{displayAmount(order, item.product.price * item.quantity)}</span>
                 </div>
               ))}
             </div>

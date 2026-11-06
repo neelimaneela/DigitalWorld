@@ -36,7 +36,7 @@ export default function HomePage() {
       <section className="container-x">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { icon: Truck, title: 'Free Shipping', desc: 'On orders over $50' },
+            { icon: Truck, title: 'Flat Shipping', desc: 'Rp52.000 per order' },
             { icon: RotateCcw, title: '30-Day Returns', desc: 'Hassle-free returns' },
             { icon: ShieldCheck, title: '2-Year Warranty', desc: 'On all products' },
             { icon: HeadsetIcon, title: '24/7 Support', desc: 'Always here to help' },

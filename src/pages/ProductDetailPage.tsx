@@ -8,6 +8,7 @@ import { getProductById, products } from '../data/products';
 import { useStore } from '../store/StoreContext';
 import Rating from '../components/Rating';
 import ProductCard from '../components/ProductCard';
+import { formatIDR, toIDR } from '../utils/currency';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -148,17 +149,17 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="mt-5 flex items-end gap-3">
-            <span className="text-3xl font-bold text-slate-900 dark:text-white">${product.price}</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{formatIDR(toIDR(product.price))}</span>
             {product.originalPrice > product.price && (
               <>
-                <span className="text-lg text-slate-400 line-through">${product.originalPrice}</span>
+                <span className="text-lg text-slate-400 line-through">{formatIDR(toIDR(product.originalPrice))}</span>
                 <span className="badge bg-success-100 text-success-700 dark:bg-success-950 dark:text-success-400">
-                  Save ${product.originalPrice - product.price}
+                  Save {formatIDR(toIDR(product.originalPrice) - toIDR(product.price))}
                 </span>
               </>
             )}
           </div>
-          <p className="mt-1 text-xs text-slate-400">Tax included. Free shipping calculated at checkout.</p>
+          <p className="mt-1 text-xs text-slate-400">Flat shipping: Rp52.000. No additional automatic tax.</p>
 
           <p className="mt-5 text-slate-600 dark:text-slate-300 leading-relaxed">{product.description}</p>
 
@@ -208,7 +209,7 @@ export default function ProductDetailPage() {
           {/* Trust badges */}
           <div className="mt-6 grid grid-cols-3 gap-3">
             {[
-              { icon: Truck, text: 'Free Shipping' },
+              { icon: Truck, text: 'Flat Shipping' },
               { icon: RotateCcw, text: '30-Day Returns' },
               { icon: ShieldCheck, text: '2-Year Warranty' },
             ].map((item, i) => (
